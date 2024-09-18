@@ -30,29 +30,35 @@ export default function Book() {
   };
   
   return (
-    <div className="books">
-      <h1>Books</h1>
-      <CreateBookForm />
-      <ul className="books-list">
-        {books.map((book) => (
-          <li key={book.id} className="book-item">
-            <div className="book-title">{book.title}</div>
-            <div className="book-author">by {book.author}</div>
-            <div className="book-buttons">
-              <Form method="delete" action={"/books?id=" + book.id}>
-                <button type="submit">Delete</button>
-              </Form>
-              <button onClick={() => handleUpdateClick(book)}>Update</button>
-            </div>
-          </li>
-        ))}
-      </ul>
-      {showUpdateForm && (
-        <UpdateBookForm
-          book={selectedBook}
-          onClose={() => setShowUpdateForm(false)}
-        />
-      )}
+    <div className="container mx-auto px-4">
+      <div className="books">
+        <h1>Books</h1>
+        <CreateBookForm />
+        <ul className="books-list divide-y divide-gray-100">
+          {books.map((book) => (
+            <li key={book.id} className="book-item flex justify-between gap-x-6 py-5">
+              <div className="min-w-0 flex-auto">
+                <div className="book-title">{book.title}</div>
+                <div className="book-author">by {book.author}</div>
+              </div>
+              <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+                <div className="book-buttons">
+                  <Form method="delete" action={"/books?id=" + book.id}>
+                    <button type="submit">Delete</button>
+                  </Form>
+                  <button onClick={() => handleUpdateClick(book)}>Update</button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {showUpdateForm && (
+          <UpdateBookForm
+            book={selectedBook}
+            onClose={() => setShowUpdateForm(false)}
+          />
+        )}
+      </div>
     </div>
   );
 }
