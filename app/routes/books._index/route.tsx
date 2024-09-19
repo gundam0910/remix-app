@@ -1,44 +1,58 @@
-import { Form, json, redirect, useLoaderData } from '@remix-run/react';
+import { Form, json, useLoaderData } from '@remix-run/react';
+import { useState } from 'react';
+import { redirectWithSuccess, redirectWithError } from "remix-toast";
+
+import {getBooks, createBook, deleteBook} from '../../controllers/books'
 import CreateBookForm from '../../components/createForm';
 import UpdateBookForm from '../../components/updateForm';
-import { useState } from 'react';
-import { db } from "~/utils/db.server";
 
 export const loader = async () => {
-  const response = await db.book.findMany({
-    orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, author: true},
-      take: 5,
-  });
+  const response = await getBooks();
   const data: { id: string; title: string; author: string; }[] = response;
-  console.log('data :>> ', data);
-  return json({ books: data});
+  return json({ books: data });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function action({ request }: { request: any }) {
-  const formData = await request.formData();
-  const title = formData.get("title");
-  const author = formData.get("author");
-  const description = 'sample description';
-  // we do this type check to be extra sure and to make TypeScript happy
-  // we'll explore validation next!
-  if (
-    typeof title !== 'string' ||
-    typeof author !== 'string' ||
-    typeof description !== 'string'
-  ) {
-    throw new Error("Form not submitted correctly.");
-  }
+  if (request.method === "DELETE") {
+    const url = new URL(request.url);
+    const bookId = url.searchParams.get("id");
+    if (bookId) {
+      const bookData = await deleteBook(bookId);
+      if (bookData) {
+        return redirectWithSuccess("/books", "You have successfully deleted!"); 
+      } else {
+        return redirectWithError("/books", "Delete failed.");
+      }
+    }
+    
+  }else{
+    const formData = await request.formData();
+    const title = formData.get("title");
+    const author = formData.get("author");
+    const description = formData.get("description");
 
-  const fields = { title, author, description };
-  const bookData = await db.book.create({ data: fields});
-  console.log('bookData :>> ', bookData);
-  return redirect("/books");
+    if (
+      typeof title !== 'string' ||
+      typeof author !== 'string'
+    ) {
+      return redirectWithError("/books", "Form not submitted correctly.");
+    }
+
+    const fields = { title, author, description };
+    const bookData = await createBook(fields);
+    if (bookData) {
+      return redirectWithSuccess("/books", "You have successfully created!"); 
+    } else {
+      return redirectWithError("/books", "Fail to create book.");
+    }
+    
+  }
 }
 
 export default function Book() {
-  const {books} = useLoaderData<typeof loader>();
+  const {books } = useLoaderData<typeof loader>();
+
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,9 +60,8 @@ export default function Book() {
     setSelectedBook(book);
     setShowUpdateForm(true);
   };
-  
+
   return (
-    <div className="container mx-auto px-4">
       <div className="books">
         <h1>Books</h1>
         <CreateBookForm />
@@ -77,6 +90,5 @@ export default function Book() {
           />
         )}
       </div>
-    </div>
   );
 }
