@@ -1,5 +1,4 @@
 import { Form, json, useLoaderData } from '@remix-run/react';
-import { LinksFunction } from '@remix-run/node';
 import { useState } from 'react';
 import { jsonWithSuccess, jsonWithError } from "remix-toast";
 
@@ -16,7 +15,6 @@ export const loader = async () => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function action({ request }: { request: any }) {
-  console.log('request.method', request.method)
   if (request.method === "DELETE") {
     const url = new URL(request.url);
     const bookId = url.searchParams.get("id");
