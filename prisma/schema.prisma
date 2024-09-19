@@ -15,15 +15,16 @@ model User {
   updatedAt    DateTime @updatedAt
   email     String   @unique
   passwordHash String
-  books        Book[]
+  //books        Book[]
 }
 
 model Book {
   id         String   @id @default(uuid())
-  bookId String
-  book   User     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  //bookId String
+  //book   User     @relation(fields: [bookId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   title       String
   author    String
+  description    String
 }
